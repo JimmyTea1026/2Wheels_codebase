@@ -3,6 +3,15 @@ import os
 import cv2
 import pandas as pd
   
+def main():
+    root_path = r"H:\Jimmy_2_wheel\road\F195\data\old_speed\bad\to_run"
+    run_video(root_path)
+    
+    # 將all資料夾搬到SD卡後，執行以下程式，將all裡面的檔案，根據num.txt重新放回各個資料夾的yuv資料夾中
+    # 最後再將各資料夾搬移回data資料夾中
+    # put_images_back(root_path)
+    # print("put images back done")
+  
 def video_to_yuv(video_path, dst_path, time_limit = 1e9, FPS=0):
     print(video_path)
     # 針對 video_path 中的影片，每隔 1/FPS 秒，將影片中的每一幀，寫入到 dst_path 中
@@ -135,7 +144,10 @@ def extract_info(xlsx_path):
     
 
     base_path = os.path.dirname(xlsx_path)
-    with(open(os.path.join(base_path, "yuv/speed_gyro.txt"), "w")) as wf:
+    txt_path = os.path.join(base_path, "yuv/speed_gyro.txt")
+    if os.path.exists(txt_path):
+        os.remove(txt_path)
+    with(open(txt_path, "w")) as wf:
         for i in range(len(speed)):
             if pd.isnull(speed[i]):
                 continue
@@ -217,12 +229,13 @@ def run_video(root_path):
     for folder in all_folders:
         folder_path = os.path.join(root_path, folder)
         sliced_path = os.path.join(folder_path, "sliced")
-        if os.path.exists(sliced_path):
-            yuv_generation(folder_path)
-        else:
-            mp4_path = os.path.join(folder_path, f"{folder}.mp4")
-            yuv_path = os.path.join(folder_path, "yuv")
-            video_to_yuv(mp4_path, yuv_path, FPS=10)
+        mp4_path = os.path.join(folder_path, f"{folder}.mp4")
+        yuv_path = os.path.join(folder_path, "yuv")
+        if not os.path.exists(yuv_path):
+            if os.path.exists(sliced_path):
+                yuv_generation(folder_path)
+            else:
+                video_to_yuv(mp4_path, yuv_path, FPS=10)
 
     # 將所有 yuv 檔案搬移到 all 資料夾中，並將 speed_gyro.txt 合併，將各個影片的frame數量寫入 num.txt
     combine(root_path)
@@ -231,10 +244,4 @@ def run_video(root_path):
 
 
 if __name__ == "__main__":
-    root_path = "/media/alva/COMPAL02/Jimmy_2_wheel/road/R195/data/new_speed/to_run_1102"
-    run_video(root_path)
-    
-    # 將all資料夾搬到SD卡後，執行以下程式，將all裡面的檔案，根據num.txt重新放回各個資料夾的yuv資料夾中
-    # 最後再將各資料夾搬移回data資料夾中
-    # put_images_back(root_path)
-    # print("put images back done")
+    main()
