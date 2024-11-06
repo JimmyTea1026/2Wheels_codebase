@@ -30,12 +30,14 @@ def get_df(file_type):
                                  'Scenario2 EQB',
                                  'Scenario2 object class',
                                  'Scenario2 object conf',
+                                 'Scenario2_not_in_roi',
                                  
                                  
                                  'Scenario4_nearest object',
                                  'Scenario4 EQB',
                                  'Scenario4 object class',
                                  'Scenario4 object conf',
+                                 'Scenario4_not_in_roi',
 
                                  
                                  'Scenario5_nearest object left',
@@ -46,6 +48,8 @@ def get_df(file_type):
                                  'Scenario5 object class right',
                                  'Scenario5 object conf left',
                                  'Scenario5 object conf right',
+                                 'Scenario5_frame_left_not_in_roi',
+                                 'Scenario5_frame_right_not_in_roi',
                                  'our_speed',
                                  'our_roll',
                                  'our_pitch',
@@ -84,6 +88,10 @@ def get_df(file_type):
                                  'Scenario3 object class',
                                  'Scenario3 EQB',
                                  'Scenario3 object conf',
+                                 'Scenario3_left_not_in_roi',
+                                 'Scenario3_right_not_in_roi',
+                                 'Scenario3_DSW_left_too_big'
+                                 'Scenario3_DSW_right_too_big'
                                  
                                  'our_speed',
                                  'our_roll',
@@ -274,6 +282,15 @@ def process_event_r195(event,df,message_dicarded):
             kw=re.search(r'object conf right:\s(\d+\.\d+)',event)
             if kw:
                 df.at[len(df) - 1, 'Scenario5 object conf right']=float(kw.group(1))
+
+        elif 'Scenario5_frame_left_not_in_roi' in event:
+            df.at[len(df) - 1, 'Scenario5_frame_left_not_in_roi']=1
+        elif 'Scenario5_frame_right_not_in_roi' in event:
+            df.at[len(df) - 1, 'Scenario5_frame_right_not_in_roi']=1
+        elif 'Scenario4_not_in_roi' in event:
+            df.at[len(df) - 1, 'Scenario4_not_in_roi']=1
+        elif 'Scenario2_not_in_roi' in event:
+            df.at[len(df) - 1, 'Scenario2_not_in_roi']=1
                                                           
             
         else:   
@@ -414,6 +431,16 @@ def process_event_f195(event,df,message_dicarded):
             kw=re.search(r'object conf:\s(\d+\.\d+)',event)
             if kw:
                 df.at[len(df) - 1, 'Scenario3 object conf']=float(kw.group(1))
+                
+        elif 'Scenario3_left_not_in_roi' in event:
+            df.at[len(df) - 1, 'Scenario3_left_not_in_roi']=1
+        elif 'Scenario3_right_not_in_roi' in event:
+            df.at[len(df) - 1, 'Scenario3_right_not_in_roi']=1
+        
+        elif 'Scenario3_DSW_left_too_big' in event:
+            df.at[len(df) - 1, 'Scenario3_DSW_left_too_big']=1
+        elif 'Scenario3_DSW_right_too_big' in event:
+            df.at[len(df) - 1, 'Scenario3_DSW_right_too_big']=1
                        
         else:   
             message_dicarded.add(event)
