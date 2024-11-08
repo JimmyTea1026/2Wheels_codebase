@@ -2,12 +2,18 @@ import pandas as pd
 import os
 
 def main():
-    target_path = r"H:\Jimmy_2_wheel\road\R195\data\old_speed\bad"
-    for folder in os.listdir(target_path):
-        if folder == "to_run":
-            continue
-        folder_path = os.path.join(target_path, folder)
-        folder_process(folder_path)
+    # target_path = r"H:\Jimmy_2_wheel\road\R195\data\old_speed\bad"
+    # for folder in os.listdir(target_path):
+    #     if folder == "to_run":
+    #         continue
+    #     folder_path = os.path.join(target_path, folder)
+    #     folder_process(folder_path)
+
+    root_path = r"/media/alva/COMPAL02/to_jimmy/speed_50/R195"
+    for folder in os.listdir(root_path):
+        folder_path = os.path.join(root_path, folder)
+        if folder == "all" or not os.path.isdir(folder_path): continue
+        gen_txt(folder_path, speed=50)
         
 def folder_process(folder_path):
     folder = os.path.basename(folder_path)
@@ -59,6 +65,21 @@ def fill_speed_gyro(df):
             df[column] = df[column].fillna(method='ffill')  
 
     return df 
+
+def gen_txt(folder_path, speed=50):
+    yuv_path = os.path.join(folder_path, "yuv")
+    txt_path = os.path.join(yuv_path, "speed_gyro.txt")
+    if os.path.exists(txt_path):
+        os.remove(txt_path)
+    images = os.listdir(yuv_path)
+    frame_num = len(images)+0
+
+    # Create the content
+    content = f"{speed} 0.0 0.0 0.0\n" * frame_num
+
+    # Write to a text file
+    with open(txt_path, "w") as file:
+        file.write(content)
 
 if __name__ == '__main__':
     main()
