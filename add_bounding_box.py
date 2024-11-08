@@ -440,6 +440,17 @@ class video_synthesis:
             
         self.add_speed_gyro(image, df, i)
         
+        if not pd.isnull(df.at[i, 'Scenario3_area_judge_str']):
+            s3_area = df.at[i, 'Scenario3_area_judge_str']
+            s3_area = float(s3_area)
+            self.set_label(image, f"S3_area: {s3_area}", int(s3x1*1920/480),int(s3y1*1280/480)+80)
+        
+        if not pd.isnull(df.at[i, 'Scenario3_DSW_left_too_big']):
+            self.set_label(image, f"S3_left_too_big", int(s3x1*1920/480),int(s3y1*1280/480)+100, color=(0,0,255))
+            
+        if not pd.isnull(df.at[i, 'Scenario3_DSW_right_too_big']):
+            self.set_label(image, f"S3_right_too_big", int(s3x1*1920/480),int(s3y1*1280/480)+100, color=(0,0,255))
+        
         return image
 
     def f60_plot(self, image):  

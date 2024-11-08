@@ -90,8 +90,8 @@ def get_df(file_type):
                                  'Scenario3 object conf',
                                  'Scenario3_left_not_in_roi',
                                  'Scenario3_right_not_in_roi',
-                                 'Scenario3_DSW_left_too_big'
-                                 'Scenario3_DSW_right_too_big'
+                                 'Scenario3_DSW_left_too_big',
+                                 'Scenario3_DSW_right_too_big',
                                  
                                  'our_speed',
                                  'our_roll',
@@ -417,7 +417,7 @@ def process_event_f195(event,df,message_dicarded):
             if kw:   
                 df.at[len(df) - 1, 'Scenario2 object class']=int(kw.group(1))  
                 
-        elif 'Scenario3 object class':
+        elif 'Scenario3 object class ' in event:
             kw=re.search(r'object class:\s(\d)',event)
             if kw:   
                 df.at[len(df) - 1, 'Scenario3 object class']=int(kw.group(1)) 
