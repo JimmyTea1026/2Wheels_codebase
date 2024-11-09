@@ -4,45 +4,67 @@ import cv2
 import pandas as pd
   
 def main():
-    root_path = r"H:\Jimmy_2_wheel\road\F195\data\old_speed\bad\to_run"
+    root_path = r"/media/alva/COMPAL02/Jimmy_2_wheel/road/R195/data/bad/to_run"
     run_video(root_path)
-    
-    # 將all資料夾搬到SD卡後，執行以下程式，將all裡面的檔案，根據num.txt重新放回各個資料夾的yuv資料夾中
-    # 最後再將各資料夾搬移回data資料夾中
     # put_images_back(root_path)
-    # print("put images back done")
-  
-def video_to_yuv(video_path, dst_path, time_limit = 1e9, FPS=0):
-    print(video_path)
-    # 針對 video_path 中的影片，每隔 1/FPS 秒，將影片中的每一幀，寫入到 dst_path 中
-    # 若有 time_limit 參數，則只處理前 time_limit 秒的影片
+    # root_path = r"/media/alva/COMPAL02/Jimmy_2_wheel/1108_after_noon/R195/speed_5/1"
+    # run_video(root_path)
+    # put_images_back(root_path)
     
-    cap = cv2.VideoCapture(video_path)
+
+def video_to_yuv(video_path, dst_path, time_limit=1e9, FPS=0, flip=False):
+    print(f"Processing video: {video_path}")
+    
+    # Check if destination folder exists, if not, create it
     if not os.path.exists(dst_path):
         os.makedirs(dst_path)
+    
+    cap = cv2.VideoCapture(video_path)
     video_fps = cap.get(cv2.CAP_PROP_FPS)
-    f = int(video_fps/FPS)+1
+    total_frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    f = int(video_fps / FPS) + 1 if FPS > 0 else 1
 
     frame_count = 0
     idx = 0
+    
     while True:
         frame_count += 1
+        # Read next frame
         ret, frame = cap.read()
-        if not ret or frame_count >= video_fps * time_limit:
+
+        # If we've processed the desired time limit, stop processing
+        if frame_count >= video_fps * time_limit:
             break
-        if FPS > 0:
-            if frame_count % f != 0:
-                continue
-        frame = cv2.resize(frame, (1920, 1280))
-        frame = cv2.flip(frame, -1)
-        # cv2.imshow("1", frame)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV_I420)
-        dst_file = os.path.join(dst_path, "{:05d}.yuv".format(idx))
-        with open(dst_file, "wb") as wf:
-            wf.write(frame.tobytes())
-        idx += 1
-        cv2.waitKey(0)
         
+        if not ret:
+            # Skip corrupted frames or end of video
+            if frame_count < total_frame_count:
+                print(f"Warning: Skipping corrupted or unreadable frame {frame_count}")
+                continue
+            else:
+                break  # End of video
+        
+        # If FPS is set, skip frames according to the frame interval (frame_count % f != 0)
+        if FPS > 0 and frame_count % f != 0:
+            continue
+        
+        # Resize and optionally flip the frame
+        frame = cv2.resize(frame, (1920, 1280))
+        if flip:
+            frame = cv2.flip(frame, -1)
+
+        # Convert to YUV I420 color format
+        frame_yuv = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV_I420)
+        
+        # Write to the destination file as a .yuv
+        dst_file = os.path.join(dst_path, f"{idx:05d}.yuv")
+        with open(dst_file, "wb") as wf:
+            wf.write(frame_yuv.tobytes())
+        
+        # Increment index for the next frame
+        idx += 1
+    
+    # Release video capture object when done
     cap.release()
  
 def combine(root_path):
@@ -180,7 +202,7 @@ def check(root_path):
 
 def yuv_generation(folder_path):
     # 根據will 拿來的log與圖片，生成filein用的yuv檔案
-    input_folder = folder_path.split["/"][-1]
+    input_folder = os.path.basename(folder_path)
     yuv_path = os.path.join(folder_path, "yuv")
     if os.path.exists(yuv_path):
         return
