@@ -8,10 +8,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def main():
     camera_type = "front195"
-    root_path = r"D:\Compal\Projects\2_wheels\Utils\filein\processed"
-    save_path = r"D:\Compal\Projects\2_wheels\Utils\filein\video"
-    single_run(camera_type, root_path, save_path)
-    # batch_run(camera_type, root_path, save_path)
+    root_path = r"/media/alva/COMPAL02/Jimmy_2_wheel/road/F195/data/bad/to_run/test"
+    save_path = r"/media/alva/COMPAL02/Jimmy_2_wheel/road/F195/v10_processed/test"
+    batch_run(camera_type, root_path, save_path)
+    
+    # single_run(camera_type, root_path, save_path)
 
 def batch_run(camera_type, root_path, save_path):
     # 將 filein 結束的 processed 資料夾放到 to_run 資料夾
@@ -59,6 +60,30 @@ def single_run(camera_type, root_path, save_path):
     # 2. 開始合成影片
     video_synthesis(root_path, xlsx_path, save_path, camera_type)
     
+
+def video_synthesis(folder, processed_path, save_path, camera_type):
+    infos = {
+        "yuv_width":1920,
+        "yuv_height":1280,
+        "resize_width":1920,
+        "resize_height":1280,
+        "fourcc":cv2.VideoWriter_fourcc(*'mp4v'),
+        "fps":9,
+        "version":"v10_0.03test",
+        "camera_type":camera_type
+    }
+    
+    folder_path = os.path.join(processed_path, folder)  
+    if os.path.isdir(folder_path):  
+        # 過濾出所有 .xlsx 檔案  
+        xlsx_files = [f for f in os.listdir(folder_path) if f.endswith('.xlsx')]  
+        if xlsx_files:  
+            xlsx_path = os.path.join(folder_path, xlsx_files[0])  
+            video_handler.video_processing(folder_path, xlsx_path, save_path, infos) 
+        else:  
+            print(f"No .xlsx file found in {folder_path}")
+
+
 def split_xlsx(num_path, xlsx_path):
     # 透過 num.txt 中紀錄的各影片的幀數，將 xlsx 檔案切割成多個 xlsx 檔案並放進影片的資料夾中
     
@@ -181,28 +206,6 @@ def df_to_excel(df,camera_type, root_path):
     else:
         print("please check camera_type")
         input()
-
-def video_synthesis(folder, processed_path, save_path, camera_type):
-    infos = {
-        "yuv_width":1920,
-        "yuv_height":1280,
-        "resize_width":1920,
-        "resize_height":1280,
-        "fourcc":cv2.VideoWriter_fourcc(*'mp4v'),
-        "fps":9,
-        "version":"v08",
-        "camera_type":camera_type
-    }
-    
-    folder_path = os.path.join(processed_path, folder)  
-    if os.path.isdir(folder_path):  
-        # 過濾出所有 .xlsx 檔案  
-        xlsx_files = [f for f in os.listdir(folder_path) if f.endswith('.xlsx')]  
-        if xlsx_files:  
-            xlsx_path = os.path.join(folder_path, xlsx_files[0])  
-            video_handler.video_processing(folder_path, xlsx_path, save_path, infos) 
-        else:  
-            print(f"No .xlsx file found in {folder_path}")
 
 if __name__== '__main__':
     main()
