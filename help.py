@@ -13,7 +13,7 @@ def main():
     for folder in os.listdir(root_path):
         folder_path = os.path.join(root_path, folder)
         if folder == "all" or not os.path.isdir(folder_path): continue
-        gen_txt(folder_path, speed=50)
+        gen_speed_gyro(folder_path, speed=50)
         
 def folder_process(folder_path):
     folder = os.path.basename(folder_path)
@@ -66,7 +66,7 @@ def fill_speed_gyro(df):
 
     return df 
 
-def gen_txt(folder_path, speed=50):
+def gen_speed_gyro(folder_path, speed=50):
     yuv_path = os.path.join(folder_path, "yuv")
     txt_path = os.path.join(yuv_path, "speed_gyro.txt")
     if os.path.exists(txt_path):

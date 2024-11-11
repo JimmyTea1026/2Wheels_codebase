@@ -6,9 +6,13 @@ import pandas as pd
 def main():
     root_path = r"/media/alva/COMPAL02/Jimmy_2_wheel/road/R195/data/bad/to_run"
     run_video(root_path)
-    # put_images_back(root_path)
-    # root_path = r"/media/alva/COMPAL02/Jimmy_2_wheel/1108_after_noon/R195/speed_5/1"
-    # run_video(root_path)
+    
+    
+    # 將所有 yuv 檔案搬移到 all 資料夾中，並將 speed_gyro.txt 合併，將各個影片的frame數量寫入 num.txt
+    # combine(root_path)
+    # 檢查 all 資料夾中的 yuv 檔案是否有缺漏，若有缺漏則複製前後的 yuv 檔案
+    # check(root_path)
+    # 待all資料夾複製到SD卡後，將yuv還原至各自的資料夾中
     # put_images_back(root_path)
     
 
@@ -104,7 +108,7 @@ def combine(root_path):
         with open(num_path, "a") as wf:
             wf.write(f"{folder} {len(files)} {speed_line_num}\n")
     
-def select(input_folder, mp4_path):
+def extract_from_sliced(input_folder, mp4_path):
     # Based on slices folder, find out which frame in the video should be extracted and save into yuv file
 
     plot_path = os.path.join(input_folder, "sliced")
@@ -145,7 +149,7 @@ def reorder(dst_path):
         dst_file = os.path.join(dst_path, "{:05d}.yuv".format(idx))
         os.rename(src_file, dst_file)
     
-def extract_info(xlsx_path):
+def extract_speed_gyro(xlsx_path):
     # 讀取 xlsx, and extract speed info and gyro info
 
     df = pd.read_excel(xlsx_path)
@@ -212,11 +216,11 @@ def yuv_generation(folder_path):
     
     print(f"Start {input_folder}")
     # 1. 根據 sliced 資料夾中的圖片，從 mp4 中選出對應的 yuv 檔案
-    select(folder_path, mp4_path)
+    extract_from_sliced(folder_path, mp4_path)
     # 2. 將 yuv 檔案重新命名為 00000.yuv, 00001.yuv, ...
     reorder(os.path.join(folder_path, "yuv")) 
     # 3. 將 xlsx 中的 speed, pitch, yaw, roll 寫入到 speed_gyro.txt 中
-    extract_info(xlsx_path)
+    extract_speed_gyro(xlsx_path)
     
     print(f"Finish {input_folder}")
     
@@ -258,11 +262,6 @@ def run_video(root_path):
                 yuv_generation(folder_path)
             else:
                 video_to_yuv(mp4_path, yuv_path, FPS=10)
-
-    # 將所有 yuv 檔案搬移到 all 資料夾中，並將 speed_gyro.txt 合併，將各個影片的frame數量寫入 num.txt
-    combine(root_path)
-    # 檢查 all 資料夾中的 yuv 檔案是否有缺漏，若有缺漏則複製前後的 yuv 檔案
-    check(root_path)
 
 
 if __name__ == "__main__":
